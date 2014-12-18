@@ -25,8 +25,10 @@ Capistrano::Configuration.instance(:must_exist).load do
             session.else "[ -e #{deploy_lockfile} ] && cat #{deploy_lockfile} || true" do |ch, stream, output|
               # this sets the lock value on the first server we found
               if self[:deploy_lock].nil? && output && output != ""
+                lock = YAML.load(output)
+                next unless lock.kind_of?(Hash)
                 logger.info "Deploy lock found on: #{current_server.host}"
-                set :deploy_lock, YAML.load(output)
+                set :deploy_lock, lock
               end
             end
           end
